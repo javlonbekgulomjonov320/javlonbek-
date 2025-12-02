@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Avto Salon</title>
+<style>
+*{margin:0; padding:0; box-sizing:border-box; font-family:Arial,sans-serif;}
+body{background:#f2f2f2;}
+header{background:#003366; color:white; padding:20px; text-align:center; position:sticky; top:0; z-index:10;}
+nav ul{display:flex; justify-content:center; gap:20px; list-style:none; margin-top:10px; flex-wrap:wrap;}
+nav a{color:white; text-decoration:none; font-size:18px; transition: color 0.3s;}
+nav a:hover{color:#00c3ff;}
+.hero{background:url('https://images.unsplash.com/photo-1611312448281-08b032db93c3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5MTIyOXwwfDF8c2VhcmNofDEwfHxjYXJ8ZW58MHx8fHwxNjY5NzIyNjc5&ixlib=rb-4.0.3&q=80&w=1080') center/cover; color:white; padding:100px 20px; text-align:center;}
+.hero h1{font-size:36px; text-shadow:0 0 15px black;}
+.car-cards{display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:25px; padding:20px; max-width:1200px; margin:auto;}
+.card{background:white; border-radius:15px; padding:15px; box-shadow:0 5px 15px rgba(0,0,0,0.15); text-align:center; cursor:pointer; transition: transform 0.3s;}
+.card:hover{transform: translateY(-10px); box-shadow:0 10px 25px rgba(0,0,0,0.2);}
+.card img{width:100%; border-radius:10px; height:180px; object-fit:cover; transition: transform 0.3s;}
+.card:hover img{transform: scale(1.05);}
+#form-area{background:white; padding:25px; max-width:450px; margin:40px auto; border-radius:15px; box-shadow:0 5px 15px rgba(0,0,0,0.15);}
+input{width:100%; padding:12px; margin:12px 0; border-radius:8px; border:1px solid #ccc;}
+input:focus{border-color:#003366;}
+button{width:100%; padding:14px; margin-top:12px; background:#003366; color:white; border:none; border-radius:8px; cursor:pointer; transition: background 0.3s, transform 0.2s;}
+button:hover{background:#0055aa; transform: scale(1.05);}
+.service-item{display:flex; align-items:center; gap:10px; margin:12px 0; font-size:18px;}
+.service-item img{width:30px; height:30px;}
+footer{background:#003366; color:white; padding:20px; text-align:center;}
+/* Modal */
+.modal{display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); justify-content:center; align-items:center; z-index:100;}
+.modal-content{background:white; padding:20px; border-radius:10px; max-width:500px; width:90%; text-align:center; position:relative;}
+.modal-content img{width:100%; border-radius:10px; height:auto;}
+.close-btn{position:absolute; top:10px; right:15px; font-size:24px; cursor:pointer; color:#333;}
+@media(max-width:600px){
+nav a{font-size:14px;}
+.hero h1{font-size:24px;}
+#form-area{width:90%; margin:20px auto;}
+.card img{height:150px;}
+}
+</style>
+</head>
+<body>
+<header>
+<h1>Avto Salon</h1>
+<nav>
+<ul>
+<li><a href="#cars">Avtomobillar</a></li>
+<li><a href="#services">Xizmatlar</a></li>
+<li><a href="#contact">Bog'lanish</a></li>
+</ul>
+</nav>
+</header>
+
+<section class="hero">
+<h1>Eng Yaxshi Avtomobillar Shu Yerda!</h1>
+</section>
+
+<section id="cars">
+<h2 style="text-align:center; padding:20px;">Bizning avtomobillar</h2>
+<div class="car-cards" id="carList"></div>
+</section>
+
+<section id="addcar">
+<div id="form-area">
+<h3>Yangi avtomobil qo'shish</h3>
+<input type="text" id="carName" placeholder="Avtomobil nomi">
+<input type="text" id="carPrice" placeholder="Narxi (so'm)">
+<input type="text" id="carImg" placeholder="Rasm URL">
+<button onclick="addCar()">Qo'shish</button>
+</div>
+</section>
+
+<section id="services" style="text-align:center; padding:20px;">
+<h2>Xizmatlar</h2>
+<div style="max-width:400px; margin:auto; text-align:left;">
+<div class="service-item"><img src="https://img.icons8.com/ios-filled/50/000000/car.png"/>Avtomobil sotish</div>
+<div class="service-item"><img src="https://img.icons8.com/ios-filled/50/000000/money.png"/>Kreditga olish xizmatlari</div>
+<div class="service-item"><img src="https://img.icons8.com/ios-filled/50/000000/inspection.png"/>Texnik ko‘rik</div>
+<div class="service-item"><img src="https://img.icons8.com/ios-filled/50/000000/maintenance.png"/>Servis xizmatlari</div>
+</div>
+</section>
+
+<section id="contact" style="text-align:center; padding:20px;">
+<h2>Biz bilan bog'laning</h2>
+<p>Telefon: +998 90 123 45 67</p>
+<p>Manzil: Toshkent, Yunusobod</p>
+</section>
+
+<footer>
+© 2025 G.Javlonbek — Barcha huquqlar himoyalangan.
+</footer>
+
+<!-- Modal -->
+<div class="modal" id="modal">
+<div class="modal-content">
+<span class="close-btn" onclick="closeModal()">&times;</span>
+<img id="modalImg" src="" alt="">
+<h3 id="modalName"></h3>
+<p id="modalPrice"></p>
+</div>
+</div>
+
+<script>
+// Oldindan 10 ta mashina
+let cars = JSON.parse(localStorage.getItem('cars')) || [
+{name:"Damas", price:"96 932 000", img:"https://uzavtocdn.org/photos%2F5baedaac5284e5be6c9814e8d26ddc2e3ac6e26bb72f057b8ad0844fecd93ec3.png"},
+{name:"Labo", price:"96 370 000", img:"https://uzavtocdn.org/photos%2Fda9c037227fe6fb01bf367484ebeb704f5b0b1bbce7c6fdc42e87db4a2b6f4d3.png"},
+{name:"Tracker-2", price:"215 951 360", img:"https://uzavtocdn.org/photos%2F16c1420104f62f5231df321476820e6524e3edf6564d17564ac07ebfcf01b903.png"},
+{name:"Captiva LT 2", price:"304 900 000", img:"https://uzavtocdn.org/photos%2F558f72e49db8645787272d90ea10375f70b1420613bda77074c71704e7fe58fe.png"},
+{name:"Onix", price:"161 900 000", img:"https://uzavtocdn.org/photos%2F9487f799ca87a2856e8a83431a1d40e7e07eb91c6b1016b8f547c1cbf06286dd.png"},
+{name:"Malibu-2", price:"419 000 960", img:"https://uzavtocdn.org/photos%2Fbf32896ebd87d5a09c2c31464a1861f1f23879e90575f4e2228c9b2919d51d4b.png"},
+{name:"Tahoe-2", price:"1 464 500 000", img:"https://uzavtocdn.org/photos%2F955f7732e11ec578e9bc793b0173bf3219a5286119e305d434be9fd1bd42b013.png"},
+{name:"Traverse", price:"657 730 560", img:"https://chevrolet.uz/assets/images/traverse/colors/1.png"},
+{name:"Equinox", price:"416 000 000", img:"https://driversvillage.uz/storage/dv/car_color/15/iI3YMMZm6fNHytDIbw2fN14tXiMp7MUp9Qi6UkxY.webp"},
+{name:"Camry", price:"350 000 000", img:"https://images.unsplash.com/photo-1592135745086-bf3a4b40b65c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=400"}
+];
+
+function renderCars(){
+const list=document.getElementById('carList');
+list.innerHTML='';
+cars.forEach((car,index)=>{
+let imgSrc = car.img || 'https://via.placeholder.com/300x180?text=No+Image';
+list.innerHTML+=`
+<div class='card' onclick="openModal(${index})">
+<img src='${imgSrc}' alt='${car.name}'>
+<h3>${car.name}</h3>
+<p>Narxi: ${car.price} so'm</p>
+</div>`;
+});
+}
+
+function addCar(){
+const name=document.getElementById('carName').value.trim();
+const price=document.getElementById('carPrice').value.trim();
+const img=document.getElementById('carImg').value.trim();
+if(!name||!price){alert('Nom va narxni kiriting!'); return;}
+let imgSrc = img ? img : 'https://via.placeholder.com/300x180?text=No+Image';
+cars.push({name, price, img: imgSrc});
+localStorage.setItem('cars', JSON.stringify(cars));
+renderCars();
+document.getElementById('carName').value='';
+document.getElementById('carPrice').value='';
+document.getElementById('carImg').value='';
+}
+
+function openModal(index){
+let car=cars[index];
+document.getElementById('modalImg').src=car.img;
+document.getElementById('modalName').textContent=car.name;
+document.getElementById('modalPrice').textContent='Narxi: '+car.price+' so\'m';
+document.getElementById('modal').style.display='flex';
+}
+
+function closeModal(){
+document.getElementById('modal').style.display='none';
+}
+
+renderCars();
+</script>
+</body>
+</html>
